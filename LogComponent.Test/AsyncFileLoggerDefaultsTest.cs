@@ -27,7 +27,7 @@ namespace LogComponent.Test
         {
             var dateTimeMock = new Mock<IDateTime>();
             dateTimeMock.Setup(fake => fake.Now()).Returns(DateTime.Now);
-            _logger = new AsyncFileLogger(null, "logs", dateTimeMock.Object);
+            _logger = new AsyncFileLogger(dateTimeProvider: dateTimeMock.Object);
 
             _logger.Log(LogLevel.Information, $"Hello from testing midnight now");
             Thread.Sleep(1000);

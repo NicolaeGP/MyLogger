@@ -9,9 +9,10 @@ namespace LogComponent
 {
     public class AsyncFileLogger : ILogger
     {
-        LogFormatter _logFormatter;
-        IDateTime _dateTimeProvider;
-        string _folderPath;
+        readonly LogFormatter _logFormatter;
+        readonly IDateTime _dateTimeProvider;
+        readonly uint _delay;
+        readonly string _folderPath;
         StreamWriter _writer;
         string _currentLogFilePath;
         bool _flush = false;
@@ -23,7 +24,7 @@ namespace LogComponent
         /// <summary>
         /// Create an async logger.
         /// </summary>
-        public AsyncFileLogger(LogFormatter logFormatter = null, string folderPath = @"logs", IDateTime dateTimeProvider = null)
+        public AsyncFileLogger(LogFormatter logFormatter = null, string folderPath = @"logs", IDateTime dateTimeProvider = null, uint delay = 50)
         {
             if (logFormatter != null)
                 _logFormatter = logFormatter;
@@ -35,6 +36,7 @@ namespace LogComponent
             else
                 _dateTimeProvider = new DateTimeWrapper();
 
+            _delay = delay;
             _logDateTime = _dateTimeProvider.Now();
             _folderPath = folderPath;
             _currentLogFilePath = BuildLogFilePath();
@@ -75,15 +77,21 @@ namespace LogComponent
                     break;
                 if (_stop && _logLines.Count == 0)
                     break;
-
-                LogEvent logEvent;
-                var ok = _logLines.TryDequeue(out logEvent);
-                if (!ok)
-                    continue;
-                if (IsDateChanged(logEvent.Timestamp))
-                    HandleDayChange(logEvent.Timestamp);
-                _writer.WriteLine(_logFormatter(logEvent));
-                Thread.Sleep(50);
+                try
+                {
+                    LogEvent logEvent;
+                    var ok = _logLines.TryDequeue(out logEvent);
+                    if (!ok)
+                        continue;
+                    if (IsDateChanged(logEvent.Timestamp))
+                        HandleDayChange(logEvent.Timestamp);
+                    _writer.WriteLine(_logFormatter(logEvent));
+                    Thread.Sleep((int)_delay);
+                }
+                catch (Exception ex)
+                {
+                    _logLines.Enqueue(new LogEvent { LogLevel = LogLevel.Error, Timestamp = _dateTimeProvider.Now(), Message = "Logging error", Exception = ex });
+                }
             }
             _writer.Flush();
             _writer.Close();
