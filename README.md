@@ -24,6 +24,9 @@ I have also tried not overengineering this since I did not want to end up with t
   - File writer should be a singleton (you can't have different loggers to different folder paths) or we must create a factory to keep track of existing writers and if you request one for a specific folder, and one for that folder exists it must return the same one and not create a new instance (otherwise it's going to crash with "file is opened in another program"; assuming we use the same naming scheme for all)
 - The logger should be able to pick up the configurations from a config file
 - Add option to select the naming scheme for the log files
+- Add option to create logger of Type T and add that information to the log line in order to get more info where the log is coming from.
+- Add the usual LogDebug, LogTrace, LogInformation etc. methods to the interface
+- Add the usual optional parameters to the Log methods 
 - Much more testing 
 - Better recovery handling.
 
