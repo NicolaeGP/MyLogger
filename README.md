@@ -6,7 +6,6 @@ Issues at first glance:
 - One single loop that did everything
 - A random f variable compared to a random number 5
 - Naming issues
-- The use of Thread instead of Task (no point in keeping a thread occupied while the logger awaits the delay)
 - No way to test the midnight creation of new log file
 - Project using .NET Framework
 
